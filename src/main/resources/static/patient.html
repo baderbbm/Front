@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Patient Details</title>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var patientId = getPatientIdFromUrl();
+            setTimeout(function() {
+                redirectToConfiguredUrl(patientId);
+            }, 5000);
+        });
+
+        function getPatientIdFromUrl() {
+            var urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('patientId');
+        }
+
+        function redirectToConfiguredUrl(patientId) {
+            var configuredUrl = 'http://localhost:8081/patients/' + patientId;
+            window.location.href = configuredUrl;
+        }
+    </script>
+</head>
+<body>
+    <h1>Redirecting...</h1>
+</body>
+</html>
