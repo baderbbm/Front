@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend</title>
+    <meta http-equiv="refresh" content="10;url=http://localhost:8081/patients/all">
+</head>
+<body>
+    <p id="redirectMessage">Redirection vers la page des patients...</p>
+    <script>
+        // Introduire une pause de 5 secondes avant la redirection
+        setTimeout(function() {
+            window.location.href = 'http://localhost:8081/patients/all';
+        }, 5000);
+    </script>
+</body>
+</html>
