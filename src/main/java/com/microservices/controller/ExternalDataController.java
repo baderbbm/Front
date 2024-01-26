@@ -1,21 +1,29 @@
 package com.microservices.controller;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import com.microservices.dto.PatientDTO;
 
 @Controller
 public class ExternalDataController {
+	
+	// URL du microservice gateway
+	private final String urlMicroserviceGateway = "http://localhost:8081";
 
 	@GetMapping("/afficher-patients")
 	public String afficherPatients(Model model) {
-		// URL du microservice gateway
-		String urlMicroserviceGateway = "http://localhost:8081";
 
 		// Utilisez RestTemplate pour récupérer les données du microservice patients.
 		RestTemplate restTemplate = new RestTemplate();
@@ -32,7 +40,6 @@ public class ExternalDataController {
 
 	@GetMapping("/afficher-details/{patientId}")
 	public String afficherDetailsPatient(@PathVariable Long patientId, Model model) {
-		String urlMicroserviceGateway = "http://localhost:8081";
 		RestTemplate restTemplate = new RestTemplate();
 		try {
 			PatientDTO patient = restTemplate.getForObject(urlMicroserviceGateway + "/patients/" + patientId, PatientDTO.class);
@@ -44,4 +51,85 @@ public class ExternalDataController {
 			return "error";
 		}
 	}
+	
+	 @PutMapping("/modifier-adresse/{patientId}")
+	    public String modifierAdressePatient(@PathVariable Long patientId, @RequestParam String nouvelleAdresse, Model model) {
+	        try {
+	            String backendUrl = urlMicroserviceGateway + "/patients/" + patientId + "/update-adresse?nouvelleAdresse=" + nouvelleAdresse;
+
+	            HttpEntity<Void> requestEntity = new HttpEntity<>(null);
+
+	            ResponseEntity<PatientDTO> responseEntity = new RestTemplate().exchange(
+	                    backendUrl,
+	                    HttpMethod.PUT,
+	                    requestEntity,
+	                    PatientDTO.class
+	            );
+
+	            if (responseEntity.getStatusCode().is2xxSuccessful()) {
+	                return "redirect:/afficher-details/" + patientId;
+	            } else {
+	                model.addAttribute("errorMessage", "Failed to update address");
+	                model.addAttribute("status", responseEntity.getStatusCodeValue());
+	                return "error";
+	            }
+	        } catch (Exception e) {
+	            model.addAttribute("errorMessage", "Internal Server Error");
+	            model.addAttribute("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+	            return "error";
+	        }
+	    }
+	
+	@PutMapping("/modifier-numero/{patientId}")
+    public String modifierNumeroPatient(@PathVariable Long patientId, @RequestParam String nouveauNumero, Model model) {
+        try {
+            String backendUrl = urlMicroserviceGateway + "/patients/" + patientId + "/update-numero?nouveauNumero=" + nouveauNumero;
+
+            HttpEntity<Void> requestEntity = new HttpEntity<>(null);
+
+            ResponseEntity<PatientDTO> responseEntity = new RestTemplate().exchange(
+                    backendUrl,
+                    HttpMethod.PUT,
+                    requestEntity,
+                    PatientDTO.class
+            );
+
+            if (responseEntity.getStatusCode().is2xxSuccessful()) {
+                return "redirect:/afficher-details/" + patientId;
+            } else {
+                model.addAttribute("errorMessage", "Failed to update phone number");
+                model.addAttribute("status", responseEntity.getStatusCodeValue());
+                return "error";
+            }
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "Internal Server Error");
+            model.addAttribute("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            return "error";
+        }
+    }
+
+    @PostMapping("/ajouter-patient")
+    public String ajouterPatient(@RequestBody PatientDTO newPatient, Model model) {
+        try {
+            String backendUrl = urlMicroserviceGateway + "/patients/add";
+
+            ResponseEntity<PatientDTO> responseEntity = new RestTemplate().postForEntity(
+                    backendUrl,
+                    newPatient,
+                    PatientDTO.class
+            );
+
+            if (responseEntity.getStatusCode().is2xxSuccessful()) {
+                return "redirect:/afficher-patients";
+            } else {
+                model.addAttribute("errorMessage", "Failed to add a new patient");
+                model.addAttribute("status", responseEntity.getStatusCodeValue());
+                return "error";
+            }
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "Internal Server Error");
+            model.addAttribute("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            return "error";
+        }
+    }
 }
