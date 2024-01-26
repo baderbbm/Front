@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Afficher les Patients</title>
+</head>
+<body>
+    <h1>Liste des Patients</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Prénom</th>
+                <th>Nom</th>
+                <th>Date de Naissance</th>
+                <th>Genre</th>
+                <th>Adresse</th>
+                <th>Numéro de Téléphone</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Utilisez Thymeleaf pour itérer sur la liste des patients -->
+            <tr th:each="patient : ${patients}">
+                <td th:text="${patient.id}"></td>
+                <td th:text="${patient.prenom}"></td>
+                <td th:text="${patient.nom}"></td>
+                <td th:text="${#dates.format(patient.dateNaissance, 'yyyy-MM-dd')}"></td>
+                <td th:text="${patient.genre}"></td>
+                <td th:text="${patient.adressePostale}"></td>
+                <td th:text="${patient.numeroTelephone}"></td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>
