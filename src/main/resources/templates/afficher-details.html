@@ -30,5 +30,11 @@
             </tr>
         </tbody>
     </table>
+      <h2>Notes Médicales</h2>
+
+    <!-- Récupération et affichage des notes médicales -->
+    <ul th:each="note : ${medecinNotes}">
+        <li th:text="${note.note}"></li>
+    </ul>
 </body>
 </html>
