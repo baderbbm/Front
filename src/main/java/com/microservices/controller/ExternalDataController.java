@@ -1,5 +1,6 @@
 package com.microservices.controller;
 
+import java.util.Arrays;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import com.microservices.dto.PatientDTO;
+import com.microservices.dto.MedecinNoteDTO;
+
 
 @Controller
 public class ExternalDataController {
@@ -40,16 +43,21 @@ public class ExternalDataController {
 
 	@GetMapping("/afficher-details/{patientId}")
 	public String afficherDetailsPatient(@PathVariable Long patientId, Model model) {
-		RestTemplate restTemplate = new RestTemplate();
-		try {
-			PatientDTO patient = restTemplate.getForObject(urlMicroserviceGateway + "/patients/" + patientId, PatientDTO.class);
-			model.addAttribute("patient", patient);
-			return "afficher-details";
-		} catch (HttpClientErrorException.NotFound notFoundException) {
-			model.addAttribute("errorMessage", "Patient not found");
-			model.addAttribute("status", HttpStatus.NOT_FOUND.value());
-			return "error";
-		}
+	    RestTemplate restTemplate = new RestTemplate();
+	    try {
+	        PatientDTO patient = restTemplate.getForObject(urlMicroserviceGateway + "/patients/" + patientId, PatientDTO.class);
+	        model.addAttribute("patient", patient);
+
+	        ResponseEntity<MedecinNoteDTO[]> responseEntity = restTemplate.getForEntity(urlMicroserviceGateway + "/medecin/notes/" + patientId, MedecinNoteDTO[].class);
+	        MedecinNoteDTO[] medecinNotes = responseEntity.getBody();
+
+	        model.addAttribute("medecinNotes", Arrays.asList(medecinNotes));
+	        return "afficher-details";
+	    } catch (HttpClientErrorException.NotFound notFoundException) {
+	        model.addAttribute("errorMessage", "Patient not found");
+	        model.addAttribute("status", HttpStatus.NOT_FOUND.value());
+	        return "error";
+	    }
 	}
 	
 	 @PutMapping("/modifier-adresse/{patientId}")
