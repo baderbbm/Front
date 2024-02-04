@@ -1,0 +1,23 @@
+version: '3'
+services:
+  front:
+    image: front
+    ports:
+      - "8080:8080"
+    networks:
+      - my-network
+    depends_on:
+      - gateway
+
+  gateway:
+    image: gateway
+    ports:
+      - "8081:8081"
+    networks:
+      - my-network
+    depends_on:
+      - front
+
+networks:
+  my-network:
+    driver: bridge
