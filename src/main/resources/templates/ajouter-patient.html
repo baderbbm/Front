@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Ajouter un Patient</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 50%;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        label {
+            display: inline-block;
+            width: 150px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ajouter un Nouveau Patient</h1>
+
+    <form th:action="@{/ajouter-patient}" method="post" th:object="${newPatient}">
+        <table>
+            <tr>
+                <td>
+                    <label for="prenom">Prénom:</label>
+                </td>
+                <td>
+                    <input type="text" id="prenom" name="prenom" th:field="*{prenom}" required>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="nom">Nom:</label>
+                </td>
+                <td>
+                    <input type="text" id="nom" name="nom" th:field="*{nom}" required>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="dateNaissance">Date de Naissance:</label>
+                </td>
+                <td>
+                    <input type="date" id="dateNaissance" name="dateNaissance" th:field="*{dateNaissance}" required>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="genre">Genre:</label>
+                </td>
+                <td>
+                    <select id="genre" name="genre" th:field="*{genre}" required>
+                        <option value="M">Masculin</option>
+                        <option value="F">Féminin</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="adressePostale">Adresse postale:</label>
+                </td>
+                <td>
+                    <input type="text" id="adressePostale" name="adressePostale" th:field="*{adressePostale}">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="numeroTelephone">Numéro de Téléphone:</label>
+                </td>
+                <td>
+                    <input type="text" id="numeroTelephone" name="numeroTelephone" th:field="*{numeroTelephone}">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <button type="submit">Ajouter Patient</button>
+                </td>
+            </tr>
+        </table>
+    </form>
+</body>
+</html>
