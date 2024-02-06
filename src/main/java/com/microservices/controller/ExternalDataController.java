@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -75,14 +74,21 @@ public class ExternalDataController {
         }
     }
 	
-	 @PutMapping("/modifier-adresse/{patientId}")
+	 @GetMapping("/modifier-adresse/{patientId}")
+	 public String afficherFormulaireModifierAdresse(@PathVariable Long patientId, Model model) {
+	     PatientDTO patient = new RestTemplate().getForObject(urlMicroserviceGateway + "/patients/" + patientId, PatientDTO.class);
+	     model.addAttribute("patient", patient);
+	     return "modifier-adresse";
+	 }
+
+	 @PostMapping("/modifier-adresse/{patientId}")
 	    public String modifierAdressePatient(@PathVariable Long patientId, @RequestParam String nouvelleAdresse, Model model) {
 	        try {
 	            String backendUrl = urlMicroserviceGateway + "/patients/" + patientId + "/update-adresse?nouvelleAdresse=" + nouvelleAdresse;
 	            HttpEntity<Void> requestEntity = new HttpEntity<>(null);
 	            ResponseEntity<PatientDTO> responseEntity = new RestTemplate().exchange(
 	                    backendUrl,
-	                    HttpMethod.PUT,
+	                    HttpMethod.POST,
 	                    requestEntity,
 	                    PatientDTO.class
 	            );
@@ -101,7 +107,14 @@ public class ExternalDataController {
 	        }
 	    }
 	
-	@PutMapping("/modifier-numero/{patientId}")
+	 @GetMapping("/modifier-numero/{patientId}")
+	 public String afficherFormulaireModifierNumero(@PathVariable Long patientId, Model model) {
+	     PatientDTO patient = new RestTemplate().getForObject(urlMicroserviceGateway + "/patients/" + patientId, PatientDTO.class);
+	     model.addAttribute("patient", patient);
+	     return "modifier-numero";
+	 }
+	 
+	@PostMapping("/modifier-numero/{patientId}")
     public String modifierNumeroPatient(@PathVariable Long patientId, @RequestParam String nouveauNumero, Model model) {
         try {
             String backendUrl = urlMicroserviceGateway + "/patients/" + patientId + "/update-numero?nouveauNumero=" + nouveauNumero;
@@ -110,7 +123,7 @@ public class ExternalDataController {
 
             ResponseEntity<PatientDTO> responseEntity = new RestTemplate().exchange(
                     backendUrl,
-                    HttpMethod.PUT,
+                    HttpMethod.POST,
                     requestEntity,
                     PatientDTO.class
             );
