@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Modifier le numéro de téléphone</title>
+</head>
+<body>
+    <h1>Modifier le numéro de téléphone</h1>
+
+    <!-- Formulaire de modification du numéro de téléphone -->
+    <form th:action="@{'/modifier-numero/' + ${patient.id}}" method="post">
+        <div>
+            <label for="nouveauNumero">Nouveau numéro de téléphone:</label>
+            <input type="text" id="nouveauNumero" name="nouveauNumero" required>
+        </div>
+
+        <div>
+            <button type="submit">Modifier Numéro</button>
+        </div>
+    </form>
+</body>
+</html>
