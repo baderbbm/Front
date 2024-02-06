@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Modifier l'adresse</title>
+</head>
+<body>
+    <h1>Modifier l'adresse</h1>
+
+    <!-- Formulaire de modification de l'adresse postale -->
+    <form th:action="@{'/modifier-adresse/' + ${patient.id}}" method="post">
+        <div>
+            <label for="nouvelleAdresse">Nouvelle adresse postale:</label>
+            <input type="text" id="nouvelleAdresse" name="nouvelleAdresse" required>
+        </div>
+
+        <div>
+            <button type="submit">Modifier Adresse</button>
+        </div>
+    </form>
+</body>
+</html>
