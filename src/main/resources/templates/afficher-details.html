@@ -1,40 +1,49 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Détails du Patient</title>
-</head>
-<body>
-    <h1>Détails du Patient</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Prénom</th>
-                <th>Nom</th>
-                <th>Date de Naissance</th>
-                <th>Genre</th>
-                <th>Adresse</th>
-                <th>Numéro de Téléphone</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td th:text="${patient.id}"></td>
-                <td th:text="${patient.prenom}"></td>
-                <td th:text="${patient.nom}"></td>
-                <td th:text="${#dates.format(patient.dateNaissance, 'yyyy-MM-dd')}"></td>
-                <td th:text="${patient.genre}"></td>
-                <td th:text="${patient.adressePostale}"></td>
-                <td th:text="${patient.numeroTelephone}"></td>
-            </tr>
-        </tbody>
-    </table>
-      <h2>Notes Médicales</h2>
 
-    <!-- Récupération et affichage des notes médicales -->
-    <ul th:each="note : ${medecinNotes}">
-        <li th:text="${note.note}"></li>
-    </ul>
+<head>
+	<meta charset="UTF-8">
+	<title>Détails du Patient</title>
+</head>
+
+<body>
+	<h1>Détails du Patient</h1>
+	<table>
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>Prénom</th>
+				<th>Nom</th>
+				<th>Date de Naissance</th>
+				<th>Genre</th>
+				<th>Adresse postale</th>
+				<th>Numéro de Téléphone</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td th:text="${patient.id}"></td>
+				<td th:text="${patient.prenom}"></td>
+				<td th:text="${patient.nom}"></td>
+				<td th:text="${#dates.format(patient.dateNaissance, 'yyyy-MM-dd')}"></td>
+				<td th:text="${patient.genre}"></td>
+				<td th:text="${patient.adressePostale}"></td>
+				<td th:text="${patient.numeroTelephone}"></td>
+			</tr>
+		</tbody>
+	</table>
+
+	<!-- Lien vers la page de modification d'adresse -->
+	<a th:href="@{'/modifier-adresse/' + ${patient.id}}">Modifier l'adresse postale</a>
+	<br>
+	<!-- Lien vers la page de modification du numéro de téléphone -->
+	<a th:href="@{'/modifier-numero/' + ${patient.id}}">Modifier le numéro de téléphone</a>
+
+	<h2>Notes Médicales</h2>
+
+	<!-- Récupération et affichage des notes médicales -->
+	<ul th:each="note : ${medecinNotes}">
+		<li th:text="${note.note}"></li>
+	</ul>
 </body>
 </html>
