@@ -38,6 +38,9 @@
 	<br>
 	<!-- Lien vers la page de modification du numéro de téléphone -->
 	<a th:href="@{'/modifier-numero/' + ${patient.id}}">Modifier le numéro de téléphone</a>
+	<br>
+	<!-- Lien vers la page d'ajout de note médicale -->
+	<a th:href="@{'/ajouter-note/' + ${patient.id}}">Ajouter une note médicale</a>
 
 	<h2>Notes Médicales</h2>
 
@@ -46,4 +49,5 @@
 		<li th:text="${note.note}"></li>
 	</ul>
 </body>
+
 </html>
