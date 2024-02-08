@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Ajouter une note médicale</title>
+</head>
+
+<body>
+    <h1>Ajouter une note médicale</h1>
+
+    <form method="post" th:action="@{'/ajouter-note/' + ${patient.id}}">
+        <table>
+            <tr>
+                <td><label for="patId">Identifiant du patient:</label></td>
+                <td><input type="text" id="patId" name="patId" th:value="${patient.id}" readonly></td>
+            </tr>
+            <tr>
+                <td><label for="nomPatient">Nom du patient:</label></td>
+                <td><input type="text" id="nom" name="nom" th:value="${patient.nom}" readonly></td>
+            </tr>
+            <tr>
+                <td><label for="nouvelleNote">Nouvelle note médicale:</label></td>
+                <td><input type="text" id="nouvelleNote" name="nouvelleNote" required></td>
+            </tr>
+            <tr>
+                <td colspan="2"><button type="submit">Ajouter</button></td>
+            </tr>
+        </table>
+    </form>
+</body>
+
+</html>
