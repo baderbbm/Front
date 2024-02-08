@@ -17,12 +17,12 @@ import org.springframework.web.client.RestTemplate;
 import com.microservices.dto.PatientDTO;
 import com.microservices.dto.MedecinNoteDTO;
 
-
 @Controller
 public class ExternalDataController {
 	
 	// URL du microservice gateway
-	private final String urlMicroserviceGateway = "http://172.17.0.4:8081";
+	// private final String urlMicroserviceGateway = "http://172.17.0.3:8081";
+	private final String urlMicroserviceGateway = "http://localhost:8081";
 	
 	@GetMapping("/afficher-patients")
 	public String afficherPatients(Model model) {
@@ -146,5 +146,50 @@ public class ExternalDataController {
 	public String afficherFormulaireAjoutPatient(Model model) {
 	    model.addAttribute("newPatient", new PatientDTO());
 	    return "ajouter-patient";
+	}
+
+	@PostMapping("/ajouter-note/{patientId}")
+	public String ajouterNoteMedicale(@PathVariable Long patientId, @RequestParam String nouvelleNote, Model model) {
+	    try {
+	        RestTemplate restTemplate = new RestTemplate();
+	        PatientDTO patient = restTemplate.getForObject(urlMicroserviceGateway + "/patients/" + patientId, PatientDTO.class);
+
+	        if (patient == null) {
+	            return "error";
+	        }
+
+	        MedecinNoteDTO nouvelleNoteMedicale = new MedecinNoteDTO();
+	        nouvelleNoteMedicale.setPatId(patientId);
+	        nouvelleNoteMedicale.setPatient(patient.getNom());
+	        nouvelleNoteMedicale.setNote(nouvelleNote);
+
+	        String backendUrl = urlMicroserviceGateway + "/medecin/notes/" + patientId;
+
+	        ResponseEntity<Void> responseEntity = new RestTemplate().postForEntity(
+	            backendUrl,
+	            nouvelleNoteMedicale,
+	            Void.class
+	        );
+
+	        if (responseEntity.getStatusCode().is2xxSuccessful()) {
+	            return "redirect:/afficher-details/" + patientId;
+	        } else {
+	            model.addAttribute("errorMessage", "Failed to add medical note");
+	            model.addAttribute("status", responseEntity.getStatusCodeValue());
+	            return "error";
+	        }
+	    } catch (Exception e) {
+	        model.addAttribute("errorMessage", "Internal Server Error");
+	        model.addAttribute("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+	        return "error";
+	    }
+	}
+
+	@GetMapping("/ajouter-note/{patientId}")
+	public String afficherFormulaireAjoutNoteMedicale(@PathVariable Long patientId, Model model) {
+	    RestTemplate restTemplate = new RestTemplate();
+	    PatientDTO patient = restTemplate.getForObject(urlMicroserviceGateway + "/patients/" + patientId, PatientDTO.class);
+	    model.addAttribute("patient", patient);
+	    return "ajouter-note";
 	}
 }
