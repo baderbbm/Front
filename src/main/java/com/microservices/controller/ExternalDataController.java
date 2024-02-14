@@ -16,24 +16,39 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import com.microservices.dto.PatientDTO;
 import com.microservices.dto.MedecinNoteDTO;
+import org.springframework.security.core.Authentication;
 
 @Controller
 public class ExternalDataController {
 	
 	// URL du microservice gateway
-	// private final String urlMicroserviceGateway = "http://172.17.0.3:8081";
-	private final String urlMicroserviceGateway = "http://localhost:8081";
+    private final String urlMicroserviceGateway = "http://192.168.1.3:8081";
+    
+//	private final String urlMicroserviceGateway = "http://localhost:8081";
 	
 	@GetMapping("/afficher-patients")
-	public String afficherPatients(Model model) {
-		RestTemplate restTemplate = new RestTemplate();
-		PatientDTO[] patients = restTemplate.getForObject(urlMicroserviceGateway + "/patients/all", PatientDTO[].class);
-		model.addAttribute("patients", patients);
-		return "afficher-patients";
+	public String afficherPatients(Model model, Authentication authentication) {
+	    // Récupérer le rôle de l'utilisateur
+	    boolean isOrganisateur = authentication != null && authentication.getAuthorities().stream()
+	            .anyMatch(r -> r.getAuthority().equals("ROLE_ORGANISATEUR"));
+
+	    // Ajouter le rôle de l'utilisateur au modèle
+	    model.addAttribute("isOrganisateur", isOrganisateur);
+
+	    // Récupérer la liste des patients depuis votre microservice
+	    RestTemplate restTemplate = new RestTemplate();
+	    PatientDTO[] patients = restTemplate.getForObject(urlMicroserviceGateway + "/patients/all", PatientDTO[].class);
+
+	    // Ajouter la liste des patients au modèle
+	    model.addAttribute("patients", patients);
+
+	    // Retourner la vue Thymeleaf
+	    return "afficher-patients";
 	}
 
+	
 	@GetMapping("/afficher-details/{patientId}")
-	public String afficherDetailsPatient(@PathVariable Long patientId, Model model) {
+	public String afficherDetailsPatient(@PathVariable Long patientId, Model model, Authentication authentication) {
 	    RestTemplate restTemplate = new RestTemplate();
 	    try {
 	        PatientDTO patient = restTemplate.getForObject(urlMicroserviceGateway + "/patients/" + patientId, PatientDTO.class);
@@ -41,6 +56,12 @@ public class ExternalDataController {
 	        ResponseEntity<MedecinNoteDTO[]> responseEntity = restTemplate.getForEntity(urlMicroserviceGateway + "/medecin/notes/" + patientId, MedecinNoteDTO[].class);
 	        MedecinNoteDTO[] medecinNotes = responseEntity.getBody();
 	        model.addAttribute("medecinNotes", Arrays.asList(medecinNotes));
+	        
+	        // Récupérer le rôle de l'utilisateur
+	        boolean isOrganisateur = authentication != null && authentication.getAuthorities().stream()
+	                .anyMatch(r -> r.getAuthority().equals("ROLE_ORGANISATEUR"));
+	        model.addAttribute("isOrganisateur", isOrganisateur);
+	        
 	        return "afficher-details";
 	    } catch (HttpClientErrorException.NotFound notFoundException) {
 	        model.addAttribute("errorMessage", "Patient not found");
@@ -191,5 +212,14 @@ public class ExternalDataController {
 	    PatientDTO patient = restTemplate.getForObject(urlMicroserviceGateway + "/patients/" + patientId, PatientDTO.class);
 	    model.addAttribute("patient", patient);
 	    return "ajouter-note";
+	}
+	@GetMapping("/login")
+	public String afficherPageLogin(Model model) {
+	    return "login";
+	}
+
+	@GetMapping("/error")
+	public String afficherPageErreur(Model model) {
+	    return "error";
 	}
 }
