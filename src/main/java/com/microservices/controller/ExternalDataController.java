@@ -22,9 +22,9 @@ import org.springframework.security.core.Authentication;
 public class ExternalDataController {
 	
 	// URL du microservice gateway
-    private final String urlMicroserviceGateway = "http://192.168.1.3:8081";
+   // private final String urlMicroserviceGateway = "http://192.168.1.3:8081";
     
-//	private final String urlMicroserviceGateway = "http://localhost:8081";
+	private final String urlMicroserviceGateway = "http://localhost:8081";
 	
 	@GetMapping("/afficher-patients")
 	public String afficherPatients(Model model, Authentication authentication) {
@@ -45,17 +45,25 @@ public class ExternalDataController {
 	    // Retourner la vue Thymeleaf
 	    return "afficher-patients";
 	}
-
 	
 	@GetMapping("/afficher-details/{patientId}")
-	public String afficherDetailsPatient(@PathVariable Long patientId, Model model, Authentication authentication) {
+	public String afficherDetailsPatientWithRisk(@PathVariable Long patientId, Model model, Authentication authentication) {
 	    RestTemplate restTemplate = new RestTemplate();
 	    try {
+	        // Récupérer les détails du patient
 	        PatientDTO patient = restTemplate.getForObject(urlMicroserviceGateway + "/patients/" + patientId, PatientDTO.class);
-	        model.addAttribute("patient", patient);
+	        
+	        // Récupérer les notes du médecin associées au patient
 	        ResponseEntity<MedecinNoteDTO[]> responseEntity = restTemplate.getForEntity(urlMicroserviceGateway + "/medecin/notes/" + patientId, MedecinNoteDTO[].class);
 	        MedecinNoteDTO[] medecinNotes = responseEntity.getBody();
+
+	        // Calculer le niveau de risque de diabète
+	        String diabetesRisk = restTemplate.getForObject(urlMicroserviceGateway + "/diabetes-risk/patients/" + patientId, String.class);
+	        
+	        // Ajouter les informations au modèle
+	        model.addAttribute("patient", patient);
 	        model.addAttribute("medecinNotes", Arrays.asList(medecinNotes));
+	        model.addAttribute("diabetesRisk", diabetesRisk);
 	        
 	        // Récupérer le rôle de l'utilisateur
 	        boolean isOrganisateur = authentication != null && authentication.getAuthorities().stream()
