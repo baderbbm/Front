@@ -1,12 +1,17 @@
 package com.microservices.controller;
 
 import java.util.Arrays;
+
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,9 +19,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.microservices.dto.PatientDTO;
 import com.microservices.dto.MedecinNoteDTO;
-import org.springframework.security.core.Authentication;
+
 
 @Controller
 public class ExternalDataController {
@@ -27,13 +34,7 @@ public class ExternalDataController {
 	private final String urlMicroserviceGateway = "http://localhost:8081";
 	
 	@GetMapping("/afficher-patients")
-	public String afficherPatients(Model model, Authentication authentication) {
-	    // Récupérer le rôle de l'utilisateur
-	    boolean isOrganisateur = authentication != null && authentication.getAuthorities().stream()
-	            .anyMatch(r -> r.getAuthority().equals("ROLE_ORGANISATEUR"));
-
-	    // Ajouter le rôle de l'utilisateur au modèle
-	    model.addAttribute("isOrganisateur", isOrganisateur);
+	public String afficherPatients(Model model) {
 
 	    // Récupérer la liste des patients depuis votre microservice
 	    RestTemplate restTemplate = new RestTemplate();
@@ -47,7 +48,7 @@ public class ExternalDataController {
 	}
 	
 	@GetMapping("/afficher-details/{patientId}")
-	public String afficherDetailsPatientWithRisk(@PathVariable Long patientId, Model model, Authentication authentication) {
+	public String afficherDetailsPatientWithRisk(@PathVariable Long patientId, Model model) {
 	    RestTemplate restTemplate = new RestTemplate();
 	    try {
 	        // Récupérer les détails du patient
@@ -64,11 +65,7 @@ public class ExternalDataController {
 	        model.addAttribute("patient", patient);
 	        model.addAttribute("medecinNotes", Arrays.asList(medecinNotes));
 	        model.addAttribute("diabetesRisk", diabetesRisk);
-	        
-	        // Récupérer le rôle de l'utilisateur
-	        boolean isOrganisateur = authentication != null && authentication.getAuthorities().stream()
-	                .anyMatch(r -> r.getAuthority().equals("ROLE_ORGANISATEUR"));
-	        model.addAttribute("isOrganisateur", isOrganisateur);
+	       
 	        
 	        return "afficher-details";
 	    } catch (HttpClientErrorException.NotFound notFoundException) {
@@ -221,10 +218,41 @@ public class ExternalDataController {
 	    model.addAttribute("patient", patient);
 	    return "ajouter-note";
 	}
+	
 	@GetMapping("/login")
 	public String afficherPageLogin(Model model) {
 	    return "login";
 	}
+	
+	 @PostMapping("/login")
+	    public String authenticate(@RequestParam String username, @RequestParam String password, RedirectAttributes redirectAttributes) {
+	        // Création d'un objet de demande contenant les informations d'identification
+	        HttpHeaders headers = new HttpHeaders();
+	        // Requête avec des paramètres encodés en URL
+	        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+	        MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
+	        map.add("username", username);
+	        map.add("password", password);
+	        	       	        
+	        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
+	        
+	        System.out.println("request "+request.getBody());
+	        
+	        // Appel de la gateway avec les informations d'authentification
+	        ResponseEntity<String> response = new RestTemplate().postForEntity("http://localhost:8081/login", request, String.class);
+	        System.out.println("badr2");
+
+	        // Traitement de la réponse de la gateway
+	        if (response.getStatusCode() == HttpStatus.OK) {
+	            // Authentification réussie, rediriger vers la page souhaitée
+	            return "redirect:/afficher-patients";
+	        } else {
+	            // Authentification échouée, retourner vers la page de connexion avec un message d'erreur
+	            redirectAttributes.addFlashAttribute("error", "Identifiants invalides");
+	            return "redirect:/login";
+	        }
+	    }
 
 	@GetMapping("/error")
 	public String afficherPageErreur(Model model) {
