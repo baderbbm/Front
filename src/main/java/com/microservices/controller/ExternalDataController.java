@@ -1,7 +1,6 @@
 package com.microservices.controller;
 
 import java.util.Arrays;
-
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -12,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,11 +20,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.microservices.dto.PatientDTO;
 import com.microservices.dto.MedecinNoteDTO;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 
-
+@ControllerAdvice
 @Controller
 public class ExternalDataController {
 	
@@ -32,6 +35,16 @@ public class ExternalDataController {
    // private final String urlMicroserviceGateway = "http://192.168.1.3:8081";
     
 	private final String urlMicroserviceGateway = "http://localhost:8081";
+	
+    @ExceptionHandler(ResponseStatusException.class)
+    public ModelAndView handleUnauthorized(ServerWebExchange exchange, ResponseStatusException ex) {
+        if (ex.getStatusCode().equals(HttpStatus.UNAUTHORIZED)) { 
+            ModelAndView modelAndView = new ModelAndView("redirect:/login");
+            modelAndView.addObject("error", ex.getReason());
+            return modelAndView;
+        }
+        return null;
+    }
 	
 	@GetMapping("/afficher-patients")
 	public String afficherPatients(Model model) {
