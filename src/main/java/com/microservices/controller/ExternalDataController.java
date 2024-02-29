@@ -327,7 +327,6 @@ public class ExternalDataController {
 			nouvelleNoteMedicale.setNote(nouvelleNote);
 
 			// Construire l'URL du backend pour l'ajout de la note médicale
-			//String backendUrl = urlMicroserviceGateway + "/medecin/notes";
 			String backendUrl = urlMicroserviceGateway + "/medecin/notes/" + patientId;
 
 			HttpEntity<MedecinNoteDTO> requestEntity = new HttpEntity<>(nouvelleNoteMedicale, headers);
