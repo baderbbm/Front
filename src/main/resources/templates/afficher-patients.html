@@ -19,17 +19,19 @@
 				<th>Genre</th>
 				<th>Adresse postale</th>
 				<th>Numéro de Téléphone</th>
+
 			</tr>
 		</thead>
 		<tbody>
 			<tr th:each="patient : ${patients}">
-				<td th:text="${patient.id}"></td>
+			    <td><a th:href="@{'/afficher-details/' + ${patient.id}}" th:text="${patient.id}">Afficher Détails</a></td>
 				<td th:text="${patient.prenom}"></td>
 				<td th:text="${patient.nom}"></td>
 				<td th:text="${#dates.format(patient.dateNaissance, 'yyyy-MM-dd')}"></td>
 				<td th:text="${patient.genre}"></td>
 				<td th:text="${patient.adressePostale}"></td>
 				<td th:text="${patient.numeroTelephone}"></td>
+
 			</tr>
 		</tbody>
 	</table>
@@ -39,4 +41,5 @@
 		<a th:href="@{/ajouter-patient}" class="btn btn-primary">Ajouter un Patient</a>
 	</div>
 </body>
+
 </html>
