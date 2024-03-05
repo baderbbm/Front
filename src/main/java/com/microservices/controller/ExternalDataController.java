@@ -76,17 +76,18 @@ public class ExternalDataController {
 	}
 
 	@GetMapping("/afficher-patients")
-	public String afficherPatients(@RequestHeader(value = "X-User-Roles", required = false) String userRoles, Model model) {
-		// public String afficherPatients(Model model) {
-		
+	public String afficherPatients(@RequestHeader(value = "X-User-Roles", required = false) String userRoles,
+ 			Model model) {
+    // public String afficherPatients(Model model) {
+
 		// Récupérer les détails du patient depuis le microservice via la gateway
-		
+
 		HttpEntity<String> entity = createHttpEntityWithBasicAuth();
 		ResponseEntity<PatientDTO[]> response = restTemplate.exchange(urlMicroserviceGateway + "/patients/all",
 				HttpMethod.GET, entity, PatientDTO[].class);
 
 		// Récupérer le rôle de l'utilisateur à partir de l'en-tête
-		
+
 		boolean isOrganisateur = userRoles != null && userRoles.contains("ROLE_ORGANISATEUR");
 		// boolean isOrganisateur = (username.equals("org") && password.equals("org"));
 		System.out.println("User roles: " + userRoles);
