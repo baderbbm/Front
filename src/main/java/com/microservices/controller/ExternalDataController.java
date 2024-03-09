@@ -14,10 +14,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import com.microservices.dto.PatientDTO;
 import com.microservices.dto.MedecinNoteDTO;
 
@@ -50,14 +51,14 @@ public class ExternalDataController {
 	private HttpEntity<String> createHttpEntityWithBasicAuth() {
 		return createHttpEntityWithBasicAuth(null);
 	}
-
-	// Méthode de gestion des exceptions pour l'authentification
+	
 	@ExceptionHandler(HttpClientErrorException.Unauthorized.class)
-	public String handleUnauthorized(HttpClientErrorException.Unauthorized ex) {
-		if (ex.getStatusCode().equals(HttpStatus.UNAUTHORIZED)) {
-			return "redirect:/login";
-		}
-		return null;
+	public String handleUnauthorized(HttpClientErrorException.Unauthorized ex, RedirectAttributes redirectAttributes) {
+	    if (ex.getStatusCode().equals(HttpStatus.UNAUTHORIZED)) {
+	        redirectAttributes.addFlashAttribute("error", true);
+	        return "redirect:/login";
+	    }
+	    return null;
 	}
 
 	@GetMapping("/login")
@@ -74,66 +75,61 @@ public class ExternalDataController {
 		// Redirection vers la page de liste des patients
 		return "redirect:/afficher-patients";
 	}
-	
+
 	@GetMapping("/afficher-patients")
 	public String afficherPatients(Model model) {
-	    // Récupérer les détails du patient depuis le microservice via la gateway
-	    HttpEntity<String> entity = createHttpEntityWithBasicAuth();
-	    ResponseEntity<PatientDTO[]> response = restTemplate.exchange(
-	        urlMicroserviceGateway + "/patients/all",
-	        HttpMethod.GET,
-	        entity,
-	        PatientDTO[].class
-	    );
+		// Récupérer les détails du patient depuis le microservice via la gateway
+		HttpEntity<String> entity = createHttpEntityWithBasicAuth();
+		ResponseEntity<PatientDTO[]> response = restTemplate.exchange(urlMicroserviceGateway + "/patients/all",
+				HttpMethod.GET, entity, PatientDTO[].class);
 
-	    // Récupérer le rôle de l'utilisateur à partir des en-têtes de la réponse
-	    String userRoles = response.getHeaders().getFirst("X-User-Roles");
-	    boolean isOrganisateur = userRoles != null && userRoles.contains("ROLE_ORGANISATEUR");
+		// Récupérer le rôle de l'utilisateur à partir des en-têtes de la réponse
+		String userRoles = response.getHeaders().getFirst("X-User-Roles");
+		boolean isOrganisateur = userRoles != null && userRoles.contains("ROLE_ORGANISATEUR");
 
-	    // Ajouter le rôle de l'utilisateur au modèle
-	    model.addAttribute("isOrganisateur", isOrganisateur);
+		// Ajouter le rôle de l'utilisateur au modèle
+		model.addAttribute("isOrganisateur", isOrganisateur);
 
-	    // Ajouter la liste des patients au modèle
-	    List<PatientDTO> patients = Arrays.asList(response.getBody());
-	    model.addAttribute("patients", patients);
+		// Ajouter la liste des patients au modèle
+		List<PatientDTO> patients = Arrays.asList(response.getBody());
+		model.addAttribute("patients", patients);
 
-	    // Retourner la vue Thymeleaf
-	    return "afficher-patients";
+		// Retourner la vue Thymeleaf
+		return "afficher-patients";
 	}
-
 
 	@GetMapping("/afficher-details/{patientId}")
 	public String afficherDetailsPatientWithRisk(@PathVariable Long patientId, Model model) {
 
 		// Récupérer les détails du patient
 		HttpEntity<String> entity = createHttpEntityWithBasicAuth();
-		ResponseEntity<PatientDTO> response = restTemplate
-				.exchange(urlMicroserviceGateway + "/patients/" + patientId, HttpMethod.GET, entity, PatientDTO.class);
+		ResponseEntity<PatientDTO> response = restTemplate.exchange(urlMicroserviceGateway + "/patients/" + patientId,
+				HttpMethod.GET, entity, PatientDTO.class);
 
 		PatientDTO patient = response.getBody();
-
-		// Récupérer les notes du médecin associées au patient
-		ResponseEntity<MedecinNoteDTO[]> notesResponse = restTemplate.exchange(
-				urlMicroserviceGateway + "/medecin/notes/" + patientId, HttpMethod.GET, entity, MedecinNoteDTO[].class);
-
-		// Calculer le niveau de risque de diabète
-		String diabetesRisk = restTemplate.exchange(urlMicroserviceGateway + "/diabetes-risk/patients/" + patientId,
-				HttpMethod.GET, entity, String.class).getBody();
-
-		// Ajouter les informations au modèle
 		model.addAttribute("patient", patient);
-		model.addAttribute("medecinNotes", Arrays.asList(notesResponse.getBody()));
-		model.addAttribute("diabetesRisk", diabetesRisk);
 
-	    // Récupérer le rôle de l'utilisateur à partir des en-têtes de la réponse
-	    String userRoles = response.getHeaders().getFirst("X-User-Roles");
-	    boolean isOrganisateur = userRoles != null && userRoles.contains("ROLE_ORGANISATEUR");
-
+		// Récupérer le rôle de l'utilisateur à partir des en-têtes de la réponse
+		String userRoles = response.getHeaders().getFirst("X-User-Roles");
+		boolean isOrganisateur = userRoles != null && userRoles.contains("ROLE_ORGANISATEUR");
 		model.addAttribute("isOrganisateur", isOrganisateur);
+		if (!isOrganisateur) {
+			// Récupérer les notes du médecin associées au patient
+			ResponseEntity<MedecinNoteDTO[]> notesResponse = restTemplate.exchange(
+					urlMicroserviceGateway + "/medecin/notes/" + patientId, HttpMethod.GET, entity,
+					MedecinNoteDTO[].class);
+
+			// Calculer le niveau de risque de diabète
+			String diabetesRisk = restTemplate.exchange(urlMicroserviceGateway + "/diabetes-risk/patients/" + patientId,
+					HttpMethod.GET, entity, String.class).getBody();
+
+			// Ajouter les informations au modèle
+			model.addAttribute("medecinNotes", Arrays.asList(notesResponse.getBody()));
+			model.addAttribute("diabetesRisk", diabetesRisk);
+		}
 
 		return "afficher-details";
 	}
-	
 
 	@GetMapping("/ajouter-patient")
 	public String afficherFormulaireAjoutPatient(Model model) {
