@@ -36,14 +36,14 @@
 	</table>
 
 	<!-- Lien vers la page de modification d'adresse et de numéro de téléphone pour ORGANISATEUR -->
-	<div th:if="${isOrganisateur}" sec:authorize="hasRole('ROLE_ORGANISATEUR')">
+	<div th:if="${isOrganisateur}">
 		<a th:href="@{'/modifier-adresse/' + ${patient.id}}">Modifier l'adresse postale</a>
 		<br>
 		<a th:href="@{'/modifier-numero/' + ${patient.id}}">Modifier le numéro de téléphone</a>
 	</div>
 
 	<!-- Lien vers la page d'ajout de note médicale pour PRATICIEN -->
-	<div th:if="${not isOrganisateur}" sec:authorize="hasRole('ROLE_PRATICIEN')">
+	<div th:if="${!isOrganisateur}">
 		<a th:href="@{'/ajouter-note/' + ${patient.id}}">Ajouter une note médicale</a>
 
 		<h2>Notes Médicales</h2>
