@@ -37,7 +37,7 @@
 	</table>
 
 	<!-- Afficher le lien uniquement pour les utilisateurs ayant le rôle "ORGANISATEUR" -->
-	<div th:if="${isOrganisateur}" sec:authorize="hasRole('ROLE_ORGANISATEUR')">
+	<div th:if="${isOrganisateur}">
 		<a th:href="@{/ajouter-patient}" class="btn btn-primary">Ajouter un Patient</a>
 	</div>
 </body>
