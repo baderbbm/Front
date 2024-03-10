@@ -26,9 +26,9 @@ import com.microservices.dto.MedecinNoteDTO;
 public class ExternalDataController {
 
 	// URL du microservice gateway
-	// private final String urlMicroserviceGateway = "http://192.168.1.3:8081";
+	   private final String urlMicroserviceGateway = "http://192.168.1.3:8081";
 
-	private final String urlMicroserviceGateway = "http://localhost:8081";
+	// private final String urlMicroserviceGateway = "http://localhost:8081";
 
 	private RestTemplate restTemplate;
 	private String username;
