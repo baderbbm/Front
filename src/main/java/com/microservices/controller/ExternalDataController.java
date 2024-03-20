@@ -26,7 +26,7 @@ import com.microservices.dto.MedecinNoteDTO;
 public class ExternalDataController {
 
 	// URL du microservice gateway
-	   private final String urlMicroserviceGateway = "http://192.168.1.3:8081";
+	  private final String urlMicroserviceGateway = "http://192.168.1.3:8081";
 
 	// private final String urlMicroserviceGateway = "http://localhost:8081";
 
@@ -78,7 +78,8 @@ public class ExternalDataController {
 
 	@GetMapping("/afficher-patients")
 	public String afficherPatients(Model model) {
-		// Récupérer les détails du patient depuis le microservice via la gateway
+		
+		// Récupérer la liste des patients depuis le microservice via la gateway
 		HttpEntity<String> entity = createHttpEntityWithBasicAuth();
 		ResponseEntity<PatientDTO[]> response = restTemplate.exchange(urlMicroserviceGateway + "/patients/all",
 				HttpMethod.GET, entity, PatientDTO[].class);
